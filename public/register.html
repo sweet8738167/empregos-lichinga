@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Emprego Lichinga</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-briefcase"></i>
+                    Emprego Lichinga <span>Niassa</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Voltar ao Início</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 500px; width: 100%;">
+            <div class="text-center mb-3">
+                <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h2>Criar Nova Conta</h2>
+                <p class="text-muted">Junte-se à comunidade de emprego de Lichinga</p>
+            </div>
+            
+            <form id="registerForm">
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-user"></i> Nome Completo *</label>
+                        <input type="text" id="name" class="form-control" placeholder="Seu nome" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email *</label>
+                        <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+                    </div>
+                </div>
+                
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="phone"><i class="fas fa-phone"></i> Telefone (WhatsApp)</label>
+                        <input type="tel" id="phone" class="form-control" placeholder="84 123 4567">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userType">Tipo de Conta *</label>
+                        <select id="userType" class="form-control" required>
+                            <option value="">Selecione...</option>
+                            <option value="candidate">👤 Sou Candidato (busco emprego)</option>
+                            <option value="employer">🏢 Sou Empregador (publico vagas)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="companyField" class="form-group hidden">
+                    <label for="company"><i class="fas fa-building"></i> Nome da Empresa/Organização</label>
+                    <input type="text" id="company" class="form-control" placeholder="Nome da sua empresa (opcional)">
+                </div>
+                
+                <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Senha *</label>
+                        <input type="password" id="password" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword"><i class="fas fa-lock"></i> Confirmar Senha *</label>
+                        <input type="password" id="confirmPassword" class="form-control" placeholder="Digite novamente" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group" style="display: flex; align-items: center;">
+                        <input type="checkbox" id="terms" required style="width: auto; margin-right: 0.5rem;">
+                        <label for="terms" style="margin: 0;">
+                            Concordo com os <a href="#" onclick="alert('Termos de uso em desenvolvimento')">Termos de Uso</a> e 
+                            <a href="#" onclick="alert('Política de privacidade em desenvolvimento')">Política de Privacidade</a>
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="errorMessage" class="alert alert-danger hidden"></div>
+                <div id="successMessage" class="alert alert-success hidden"></div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%; padding: 1rem;">
+                    <i class="fas fa-user-plus"></i> Criar Conta
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p>Já tem conta? <a href="login.html">Faça login aqui</a></p>
+                <p style="margin-top: 1rem;">
+                    <a href="index.html" class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </p>
+            </div>
+            
+            <div class="mt-4" style="border-top: 1px solid #eee; padding-top: 1rem;">
+                <p class="text-center" style="font-size: 0.9rem; color: #7f8c8d;">
+                    <i class="fas fa-info-circle"></i>
+                    Sua segurança é importante. Nunca pediremos sua senha por email.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mostrar/ocultar campo empresa
+        document.getElementById('userType').addEventListener('change', function() {
+            const companyField = document.getElementById('companyField');
+            if (this.value === 'employer') {
+                companyField.classList.remove('hidden');
+            } else {
+                companyField.classList.add('hidden');
+            }
+        });
+        
+        // Validação de senha
+        function validatePassword() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                return 'As senhas não coincidem';
+            }
+            
+            if (password.length < 6) {
+                return 'A senha deve ter pelo menos 6 caracteres';
+            }
+            
+            return null;
+        }
+        
+        // Submissão do formulário
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            errorDiv.textContent = '';
+            errorDiv.classList.add('hidden');
+            successDiv.textContent = '';
+            successDiv.classList.add('hidden');
+            
+            // Validar senha
+            const passwordError = validatePassword();
+            if (passwordError) {
+                errorDiv.textContent = passwordError;
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // Validar termos
+            if (!document.getElementById('terms').checked) {
+                errorDiv.textContent = 'Você deve aceitar os termos de uso';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // Preparar dados
+            const userData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                isEmployer: document.getElementById('userType').value === 'employer'
+            };
+            
+            // Adicionar empresa se for empregador
+            if (userData.isEmployer) {
+                userData.company = document.getElementById('company').value;
+            }
+            
+            try {
+                // Mostrar loading
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando conta...';
+                submitBtn.disabled = true;
+                
+                // Fazer requisição
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    successDiv.textContent = '✅ Conta criada com sucesso! Redirecionando para login...';
+                    successDiv.classList.remove('hidden');
+                    
+                    // Redirecionar após 2 segundos
+                    setTimeout(() => {
+                        window.location.href = `login.html?email=${encodeURIComponent(userData.email)}`;
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = result.error || 'Erro ao criar conta. Tente novamente.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                errorDiv.classList.remove('hidden');
+                console.error('Erro:', error);
+            } finally {
+                // Restaurar botão
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Verificar se já está logado
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

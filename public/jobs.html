@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Vagas - Emprego Lichinga</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-briefcase"></i>
+                    Emprego Lichinga <span>Buscar Vagas</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Início</a>
+                    <a href="jobs.html" class="active"><i class="fas fa-search"></i> Vagas</a>
+                    <a href="post-job.html"><i class="fas fa-plus"></i> Publicar Vaga</a>
+                    <a href="dashboard.html"><i class="fas fa-user"></i> Meu Painel</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 2rem;">
+        <!-- Barra de Busca e Filtros -->
+        <div class="card mb-4">
+            <h2 class="mb-3"><i class="fas fa-search"></i> Encontrar Vagas em Lichinga</h2>
+            
+            <div class="grid" style="grid-template-columns: 2fr 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <input type="text" id="searchInput" class="form-control" 
+                           placeholder="Buscar por cargo, empresa ou palavra-chave...">
+                </div>
+                
+                <div class="form-group">
+                    <select id="categoryFilter" class="form-control">
+                        <option value="">Todas Categorias</option>
+                        <option value="Administrativo">Administrativo</option>
+                        <option value="Vendas">Vendas</option>
+                        <option value="Construção">Construção</option>
+                        <option value="Educação">Educação</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Transporte">Transporte</option>
+                        <option value="Tecnologia">Tecnologia</option>
+                        <option value="Agricultura">Agricultura</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <select id="typeFilter" class="form-control">
+                        <option value="">Todos os Tipos</option>
+                        <option value="Tempo Integral">Tempo Integral</option>
+                        <option value="Meio Período">Meio Período</option>
+                        <option value="Temporário">Temporário</option>
+                        <option value="Freelance">Freelance</option>
+                        <option value="Estágio">Estágio</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                <div>
+                    <button id="searchBtn" class="btn btn-success">
+                        <i class="fas fa-search"></i> Buscar Vagas
+                    </button>
+                    <button id="clearBtn" class="btn btn-outline" style="margin-left: 0.5rem;">
+                        <i class="fas fa-times"></i> Limpar
+                    </button>
+                </div>
+                
+                <div>
+                    <span id="resultsCount" class="text-muted">Carregando vagas...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vagas em Destaque -->
+        <div class="card mb-4" id="featuredJobs" style="display: none;">
+            <h3><i class="fas fa-star" style="color: #f39c12;"></i> Vagas em Destaque</h3>
+            <div class="grid" id="featuredJobsContainer">
+                <!-- Vagas em destaque serão carregadas aqui -->
+            </div>
+        </div>
+
+        <!-- Lista de Vagas -->
+        <div class="card">
+            <div class="flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3><i class="fas fa-list"></i> Todas as Vagas</h3>
+                <div class="flex" style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span class="text-muted" style="font-size: 0.9rem;">Ordenar por:</span>
+                    <select id="sortSelect" class="form-control" style="width: auto;">
+                        <option value="newest">Mais Recentes</option>
+                        <option value="oldest">Mais Antigas</option>
+                        <option value="salary">Maior Salário</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="jobsContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando vagas disponíveis...
+                </div>
+            </div>
+            
+            <!-- Paginação -->
+            <div id="pagination" class="text-center mt-4" style="display: none;">
+                <button id="prevBtn" class="btn btn-outline" disabled>
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <span id="pageInfo" class="mx-3" style="padding: 0 1rem;"></span>
+                <button id="nextBtn" class="btn btn-outline">
+                    Próxima <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Sem resultados -->
+            <div id="noResults" class="empty-state" style="display: none;">
+                <i class="fas fa-search" style="font-size: 3rem; color: #ddd; margin-bottom: 1rem;"></i>
+                <h4>Nenhuma vaga encontrada</h4>
+                <p>Tente ajustar seus filtros de busca ou</p>
+                <a href="post-job.html" class="btn btn-success mt-2">
+                    <i class="fas fa-plus"></i> Seja o primeiro a publicar uma vaga
+                </a>
+            </div>
+        </div>
+
+        <!-- Dicas de Busca -->
+        <div class="card mt-4">
+            <h3><i class="fas fa-lightbulb"></i> Dicas para encontrar o emprego certo</h3>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div>
+                    <h4><i class="fas fa-check-circle" style="color: #27ae60;"></i> Atualize seu perfil</h4>
+                    <p>Complete seu perfil no dashboard para se destacar</p>
+                </div>
+                
+                <div>
+                    <h4><i class="fas fa-check-circle" style="color: #27ae60;"></i> Use palavras-chave</h4>
+                    <p>Busque por termos específicos como "motorista", "vendedor", etc</p>
+                </div>
+                
+                <div>
+                    <h4><i class="fas fa-check-circle" style="color: #27ae60;"></i> Filtre por localização</h4>
+                    <p>Use "Lichinga" ou nomes de bairros na busca</p>
+                </div>
+                
+                <div>
+                    <h4><i class="fas fa-check-circle" style="color: #27ae60;"></i> Candidate-se rapidamente</h4>
+                    <p>Vagas boas são preenchidas rápido. Não demore!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Estado da aplicação
+        let currentJobs = [];
+        let filteredJobs = [];
+        let currentPage = 1;
+        const jobsPerPage = 10;
+        let currentUser = null;
+
+        // Verificar autenticação
+        function checkAuth() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                } catch (error) {
+                    console.error('Erro ao parsear usuário:', error);
+                }
+            }
+        }
+
+        // Carregar todas as vagas
+        async function loadJobs() {
+            try {
+                showLoading();
+                
+                const search = document.getElementById('searchInput').value;
+                const category = document.getElementById('categoryFilter').value;
+                const type = document.getElementById('typeFilter').value;
+                
+                // Construir URL com filtros
+                let url = '/api/jobs?';
+                const params = new URLSearchParams();
+                
+                if (search) params.append('search', search);
+                if (category) params.append('category', category);
+                if (type) params.append('type', type);
+                
+                url += params.toString();
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) throw new Error('Erro ao carregar vagas');
+                
+                currentJobs = await response.json();
+                filterAndDisplayJobs();
+                
+            } catch (error) {
+                console.error('Erro ao carregar vagas:', error);
+                document.getElementById('jobsContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Erro ao carregar vagas. Tente novamente mais tarde.
+                    </div>
+                `;
+            }
+        }
+
+        // Filtrar e exibir vagas
+        function filterAndDisplayJobs() {
+            // Aplicar ordenação
+            const sortBy = document.getElementById('sortSelect').value;
+            filteredJobs = [...currentJobs];
+            
+            switch (sortBy) {
+                case 'newest':
+                    filteredJobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    break;
+                case 'oldest':
+                    filteredJobs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                case 'salary':
+                    // Tentar extrair números do salário para ordenação
+                    filteredJobs.sort((a, b) => {
+                        const aSalary = extractSalaryNumber(a.salary);
+                        const bSalary = extractSalaryNumber(b.salary);
+                        return bSalary - aSalary;
+                    });
+                    break;
+            }
+            
+            // Atualizar contador
+            document.getElementById('resultsCount').textContent = 
+                `${filteredJobs.length} vaga${filteredJobs.length !== 1 ? 's' : ''} encontrada${filteredJobs.length !== 1 ? 's' : ''}`;
+            
+            // Mostrar/ocultar "sem resultados"
+            if (filteredJobs.length === 0) {
+                document.getElementById('jobsContainer').style.display = 'none';
+                document.getElementById('pagination').style.display = 'none';
+                document.getElementById('noResults').style.display = 'block';
+                document.getElementById('featuredJobs').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('jobsContainer').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+            
+            // Mostrar vagas em destaque (primeiras 3)
+            showFeaturedJobs();
+            
+            // Mostrar paginação
+            displayPage(currentPage);
+        }
+
+        // Extrair número do salário para ordenação
+        function extractSalaryNumber(salary) {
+            if (!salary) return 0;
+            
+            // Extrair números da string
+            const matches = salary.match(/\d+/g);
+            if (!matches) return 0;
+            
+            // Pegar o maior número encontrado
+            return Math.max(...matches.map(Number));
+        }
+
+        // Mostrar vagas em destaque
+        function showFeaturedJobs() {
+            const featured = filteredJobs
+                .filter(job => job.isActive && (job.vacancies - job.filled) > 0)
+                .slice(0, 3);
+            
+            if (featured.length > 0) {
+                document.getElementById('featuredJobs').style.display = 'block';
+                const container = document.getElementById('featuredJobsContainer');
+                container.innerHTML = '';
+                
+                featured.forEach(job => {
+                    const vacanciesLeft = job.vacancies - job.filled;
+                    const jobCard = createJobCard(job, true);
+                    container.appendChild(jobCard);
+                });
+            } else {
+                document.getElementById('featuredJobs').style.display = 'none';
+            }
+        }
+
+        // Criar card de vaga
+        function createJobCard(job, isFeatured = false) {
+            const vacanciesLeft = job.vacancies - job.filled;
+            const isFull = vacanciesLeft <= 0;
+            const badgeClass = isFull ? 'vacancy-full' : 'vacancy-available';
+            const badgeText = isFull ? 'Preenchida' : `${vacanciesLeft} vaga${vacanciesLeft !== 1 ? 's' : ''}`;
+            
+            const card = document.createElement('div');
+            card.className = `card job-card ${isFeatured ? 'featured' : ''} fade-in`;
+            if (isFeatured) {
+                card.style.border = '2px solid #f39c12';
+            }
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">${job.title}</h3>
+                        <p style="margin: 0; color: #666;">
+                            <i class="fas fa-building"></i> ${job.company}
+                        </p>
+                    </div>
+                    <span class="vacancy-badge ${badgeClass}">
+                        ${badgeText}
+                    </span>
+                </div>
+                
+                <div style="margin: 1rem 0;">
+                    <p style="margin: 0.3rem 0;">
+                        <i class="fas fa-map-marker-alt"></i> ${job.location}
+                    </p>
+                    <div class="job-meta">
+                        <span><i class="fas fa-clock"></i> ${job.type}</span>
+                        <span><i class="fas fa-money-bill-wave"></i> ${job.salary}</span>
+                        <span><i class="fas fa-tag"></i> ${job.category}</span>
+                    </div>
+                </div>
+                
+                <p>${job.description.substring(0, 150)}...</p>
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <a href="job-detail.html?id=${job._id}" class="btn" style="flex: 2;">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </a>
+                    ${!isFull ? `
+                    <button onclick="applyToJob('${job._id}')" class="btn btn-success" style="flex: 1;">
+                        <i class="fas fa-paper-plane"></i> Candidatar-se
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Mostrar página específica
+        function displayPage(page) {
+            const startIndex = (page - 1) * jobsPerPage;
+            const endIndex = startIndex + jobsPerPage;
+            const pageJobs = filteredJobs.slice(startIndex, endIndex);
+            
+            const container = document.getElementById('jobsContainer');
+            container.innerHTML = '';
+            
+            pageJobs.forEach(job => {
+                const jobCard = createJobCard(job);
+                container.appendChild(jobCard);
+            });
+            
+            // Atualizar paginação
+            updatePagination();
+        }
+
+        // Atualizar controles de paginação
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+            const pagination = document.getElementById('pagination');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageInfo = document.getElementById('pageInfo');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'block';
+            pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+            
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+        }
+
+        // Candidatar-se a vaga
+        async function applyToJob(jobId) {
+            if (!currentUser) {
+                alert('Você precisa estar logado para se candidatar. Redirecionando para login...');
+                window.location.href = `login.html?redirect=job-detail.html?id=${jobId}`;
+                return;
+            }
+            
+            try {
+                const message = prompt('Deixe uma mensagem para o empregador (opcional):');
+                
+                const response = await fetch(`/api/jobs/${jobId}/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': currentUser._id
+                    },
+                    body: JSON.stringify({
+                        message: message || ''
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Candidatura enviada com sucesso!');
+                    // Recarregar vagas para atualizar status
+                    loadJobs();
+                } else {
+                    alert(`❌ ${result.error || 'Erro ao enviar candidatura'}`);
+                }
+            } catch (error) {
+                console.error('Erro ao candidatar-se:', error);
+                alert('Erro de conexão. Tente novamente.');
+            }
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            document.getElementById('jobsContainer').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando vagas...
+                </div>
+            `;
+        }
+
+        // Event Listeners
+        document.getElementById('searchBtn').addEventListener('click', loadJobs);
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('typeFilter').value = '';
+            loadJobs();
+        });
+        
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loadJobs();
+        });
+        
+        document.getElementById('sortSelect').addEventListener('change', filterAndDisplayJobs);
+        document.getElementById('prevBtn').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayPage(currentPage);
+            }
+        });
+        
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayPage(currentPage);
+            }
+        });
+
+        // Carregar ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadJobs();
+            
+            // Carregar parâmetros da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const search = urlParams.get('search');
+            const category = urlParams.get('category');
+            
+            if (search) {
+                document.getElementById('searchInput').value = search;
+            }
+            if (category) {
+                document.getElementById('categoryFilter').value = category;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Painel - Emprego Lichinga</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-briefcase"></i>
+                    Emprego Lichinga <span>Meu Painel</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Início</a>
+                    <a href="jobs.html"><i class="fas fa-search"></i> Vagas</a>
+                    <a href="dashboard.html"><i class="fas fa-user"></i> Meu Painel</a>
+                    <button onclick="logout()" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 2rem;">
+        <!-- Cabeçalho do Dashboard -->
+        <div class="card mb-4">
+            <div id="welcomeMessage" class="loading">
+                <h2>Carregando seus dados...</h2>
+            </div>
+        </div>
+
+        <!-- Alertas e Notificações -->
+        <div id="alertsContainer" class="mb-4"></div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Seção para Empregadores -->
+            <div class="card" id="employerSection" style="display: none;">
+                <h3><i class="fas fa-bullhorn"></i> Minhas Vagas</h3>
+                <div id="myJobsList" class="loading">
+                    <p>Carregando suas vagas...</p>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="post-job.html" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Publicar Nova Vaga
+                    </a>
+                </div>
+            </div>
+
+            <!-- Minhas Candidaturas -->
+            <div class="card">
+                <h3><i class="fas fa-paper-plane"></i> Minhas Candidaturas</h3>
+                <div id="myApplications" class="loading">
+                    <p>Carregando suas candidaturas...</p>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="jobs.html" class="btn">
+                        <i class="fas fa-search"></i> Buscar Mais Vagas
+                    </a>
+                </div>
+            </div>
+
+            <!-- Perfil do Usuário -->
+            <div class="card">
+                <h3><i class="fas fa-user-circle"></i> Meu Perfil</h3>
+                <div id="profileInfo">
+                    <p>Carregando perfil...</p>
+                </div>
+                <div class="mt-3">
+                    <button onclick="editProfile()" class="btn" style="width: 100%;">
+                        <i class="fas fa-edit"></i> Editar Perfil
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estatísticas Pessoais -->
+            <div class="card">
+                <h3><i class="fas fa-chart-bar"></i> Minhas Estatísticas</h3>
+                <div id="personalStats">
+                    <p>Carregando estatísticas...</p>
+                </div>
+            </div>
+
+            <!-- Vagas Salvas (Favoritos) -->
+            <div class="card">
+                <h3><i class="fas fa-bookmark"></i> Vagas Salvas</h3>
+                <div id="savedJobs">
+                    <p class="empty-state">Nenhuma vaga salva ainda</p>
+                </div>
+            </div>
+
+            <!-- Notificações -->
+            <div class="card">
+                <h3><i class="fas fa-bell"></i> Notificações</h3>
+                <div id="notifications">
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash" style="font-size: 2rem; color: #ddd;"></i>
+                        <p>Nenhuma notificação</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Ações Rápidas -->
+        <div class="card mt-4">
+            <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <a href="post-job.html" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Publicar Vaga
+                </a>
+                <a href="jobs.html" class="btn">
+                    <i class="fas fa-search"></i> Buscar Vagas
+                </a>
+                <a href="#" onclick="updateProfile()" class="btn">
+                    <i class="fas fa-sync"></i> Atualizar Perfil
+                </a>
+                <a href="#" onclick="downloadCV()" class="btn">
+                    <i class="fas fa-download"></i> Baixar CV Modelo
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Verificar autenticação
+        let currentUser = null;
+
+        function checkAuth() {
+            const userData = localStorage.getItem('user');
+            if (!userData) {
+                window.location.href = 'login.html';
+                return null;
+            }
+            
+            try {
+                currentUser = JSON.parse(userData);
+                return currentUser;
+            } catch (error) {
+                console.error('Erro ao parsear usuário:', error);
+                localStorage.removeItem('user');
+                window.location.href = 'login.html';
+                return null;
+            }
+        }
+
+        // Carregar dados do dashboard
+        async function loadDashboard() {
+            const user = checkAuth();
+            if (!user) return;
+
+            // Atualizar mensagem de boas-vindas
+            document.getElementById('welcomeMessage').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <h2>Bem-vindo(a), ${user.name}!</h2>
+                        <p>${user.isEmployer ? '🏢 Painel do Empregador' : '👤 Painel do Candidato'}</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <span class="status-badge ${user.isEmployer ? 'status-accepted' : 'status-pending'}">
+                            ${user.isEmployer ? 'Empregador' : 'Candidato'}
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            // Mostrar/ocultar seção de empregador
+            if (user.isEmployer) {
+                document.getElementById('employerSection').style.display = 'block';
+                loadMyJobs(user._id);
+            }
+
+            // Carregar perfil
+            loadProfile(user._id);
+            
+            // Carregar candidaturas
+            loadMyApplications(user._id);
+            
+            // Carregar estatísticas
+            loadPersonalStats(user._id);
+            
+            // Carregar alertas
+            loadAlerts(user);
+        }
+
+        // Carregar perfil do usuário
+        async function loadProfile(userId) {
+            try {
+                const response = await fetch(`/api/user/${userId}`);
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('profileInfo').innerHTML = `
+                        <div style="margin-bottom: 1rem;">
+                            <p><strong><i class="fas fa-envelope"></i> Email:</strong> ${user.email}</p>
+                            ${user.phone ? `<p><strong><i class="fas fa-phone"></i> Telefone:</strong> ${user.phone}</p>` : ''}
+                            ${user.company ? `<p><strong><i class="fas fa-building"></i> Empresa:</strong> ${user.company}</p>` : ''}
+                            <p><strong><i class="fas fa-calendar"></i> Membro desde:</strong> ${new Date(user.createdAt).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
+            }
+        }
+
+        // Carregar vagas do empregador
+        async function loadMyJobs(userId) {
+            try {
+                const response = await fetch(`/api/jobs/employer/${userId}`);
+                const jobs = await response.json();
+                
+                const container = document.getElementById('myJobsList');
+                
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-bullhorn" style="font-size: 2rem; color: #ddd;"></i>
+                            <p>Você ainda não publicou nenhuma vaga</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let html = '<div style="max-height: 300px; overflow-y: auto;">';
+                jobs.forEach(job => {
+                    const vacanciesLeft = job.vacancies - job.filled;
+                    const statusClass = job.isActive ? 'status-accepted' : 'status-rejected';
+                    const statusText = job.isActive ? 'Ativa' : 'Fechada';
+                    
+                    html += `
+                        <div class="job-item" style="border-left: 3px solid ${job.isActive ? '#27ae60' : '#e74c3c'}; padding: 0.8rem; margin-bottom: 0.8rem; background: #f8f9fa; border-radius: 5px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1rem;">${job.title}</h4>
+                                    <p style="margin: 0.3rem 0; color: #666; font-size: 0.9rem;">
+                                        <i class="fas fa-map-marker-alt"></i> ${job.location}
+                                    </p>
+                                </div>
+                                <span class="status-badge ${statusClass}" style="font-size: 0.8rem;">
+                                    ${statusText}
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.9rem;">
+                                <span><i class="fas fa-users"></i> ${job.applicants?.length || 0} candidatos</span>
+                                <span><i class="fas fa-user-check"></i> ${job.filled}/${job.vacancies} vagas</span>
+                            </div>
+                            <div style="margin-top: 0.5rem;">
+                                <a href="job-detail.html?id=${job._id}" class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; width: 100%;">
+                                    <i class="fas fa-eye"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Erro ao carregar vagas:', error);
+                document.getElementById('myJobsList').innerHTML = `
+                    <div class="alert alert-danger">
+                        Erro ao carregar suas vagas
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar candidaturas do usuário
+        async function loadMyApplications(userId) {
+            try {
+                const response = await fetch(`/api/applications/my`, {
+                    headers: {
+                        'User-ID': userId
+                    }
+                });
+                
+                if (response.ok) {
+                    const applications = await response.json();
+                    const container = document.getElementById('myApplications');
+                    
+                    if (!applications || applications.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <i class="fas fa-paper-plane" style="font-size: 2rem; color: #ddd;"></i>
+                                <p>Você ainda não se candidatou a nenhuma vaga</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let html = '<div style="max-height: 300px; overflow-y: auto;">';
+                    applications.forEach(app => {
+                        if (!app.jobId) return;
+                        
+                        const statusClass = `status-${app.status}`;
+                        const statusText = app.status === 'pending' ? 'Pendente' : 
+                                          app.status === 'reviewed' ? 'Revisado' :
+                                          app.status === 'accepted' ? 'Aceito' : 'Rejeitado';
+                        
+                        html += `
+                            <div class="application-item" style="padding: 0.8rem; margin-bottom: 0.8rem; background: #f8f9fa; border-radius: 5px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 1rem;">${app.jobId?.title || 'Vaga Removida'}</h4>
+                                        ${app.jobId?.company ? `<p style="margin: 0.3rem 0; color: #666; font-size: 0.9rem;">
+                                            <i class="fas fa-building"></i> ${app.jobId.company}
+                                        </p>` : ''}
+                                    </div>
+                                    <span class="status-badge ${statusClass}" style="font-size: 0.8rem;">
+                                        ${statusText}
+                                    </span>
+                                </div>
+                                <p style="margin: 0.5rem 0; font-size: 0.9rem;">
+                                    <i class="fas fa-calendar"></i> Candidatado em: ${new Date(app.appliedAt).toLocaleDateString('pt-BR')}
+                                </p>
+                                ${app.jobId ? `
+                                <div>
+                                    <a href="job-detail.html?id=${app.jobId._id}" class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; width: 100%;">
+                                        <i class="fas fa-eye"></i> Ver Vaga
+                                    </a>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar candidaturas:', error);
+                document.getElementById('myApplications').innerHTML = `
+                    <div class="empty-state">
+                        <p>Funcionalidade em desenvolvimento...</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Carregar estatísticas pessoais
+        async function loadPersonalStats(userId) {
+            try {
+                // Esta função seria implementada quando tivermos mais dados
+                document.getElementById('personalStats').innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="text-center">
+                            <div class="stats-number" id="totalApplications">0</div>
+                            <p>Candidaturas</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="stats-number" id="activeJobs">0</div>
+                            <p>Vagas Ativas</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Atualizar com dados reais quando API estiver pronta
+                setTimeout(() => {
+                    document.getElementById('totalApplications').textContent = '0';
+                    document.getElementById('activeJobs').textContent = '0';
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro ao carregar estatísticas:', error);
+            }
+        }
+
+        // Carregar alertas
+        async function loadAlerts(user) {
+            const container = document.getElementById('alertsContainer');
+            
+            // Alertas para empregadores
+            if (user.isEmployer) {
+                try {
+                    const response = await fetch(`/api/jobs/employer/${user._id}`);
+                    const jobs = await response.json();
+                    
+                    if (jobs && jobs.length > 0) {
+                        const jobsWithApplicants = jobs.filter(job => job.applicants?.length > 0);
+                        if (jobsWithApplicants.length > 0) {
+                            container.innerHTML = `
+                                <div class="alert alert-info">
+                                    <i class="fas fa-users"></i>
+                                    Você tem ${jobsWithApplicants.length} vaga(s) com novos candidatos. 
+                                    <a href="#" onclick="viewApplicants()">Ver candidatos</a>
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (error) {
+                    // Silenciar erro
+                }
+            }
+        }
+
+        // Funções auxiliares
+        function editProfile() {
+            alert('Funcionalidade de edição de perfil em desenvolvimento!');
+        }
+
+        function updateProfile() {
+            alert('Atualização de perfil em breve!');
+        }
+
+        function downloadCV() {
+            alert('Modelo de CV será disponibilizado em breve!');
+        }
+
+        function viewApplicants() {
+            alert('Visualização de candidatos em desenvolvimento!');
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        // Carregar dashboard ao iniciar
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Vaga - Emprego Lichinga</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-briefcase"></i>
+                    Emprego Lichinga <span>Detalhes da Vaga</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Início</a>
+                    <a href="jobs.html"><i class="fas fa-search"></i> Vagas</a>
+                    <a href="dashboard.html"><i class="fas fa-user"></i> Meu Painel</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 2rem;">
+        <div id="loading" class="loading" style="text-align: center; padding: 3rem;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i>
+            <p>Carregando detalhes da vaga...</p>
+        </div>
+
+        <div id="jobDetail" style="display: none;">
+            <!-- Cabeçalho da Vaga -->
+            <div class="card mb-4">
+                <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap;">
+                    <div style="flex: 1;">
+                        <h1 id="jobTitle" style="margin: 0 0 0.5rem 0;"></h1>
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                            <span style="font-size: 1.2rem;">
+                                <i class="fas fa-building"></i> <span id="jobCompany"></span>
+                            </span>
+                            <span class="status-badge" id="jobStatusBadge"></span>
+                        </div>
+                    </div>
+                    
+                    <div id="actionButtons" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                </div>
+                
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <h4><i class="fas fa-map-marker-alt"></i> Localização</h4>
+                        <p id="jobLocation"></p>
+                    </div>
+                    
+                    <div>
+                        <h4><i class="fas fa-money-bill-wave"></i> Salário</h4>
+                        <p id="jobSalary"></p>
+                    </div>
+                    
+                    <div>
+                        <h4><i class="fas fa-clock"></i> Tipo</h4>
+                        <p id="jobType"></p>
+                    </div>
+                    
+                    <div>
+                        <h4><i class="fas fa-users"></i> Vagas</h4>
+                        <p id="jobVacancies"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descrição e Detalhes -->
+            <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div>
+                    <!-- Descrição -->
+                    <div class="card mb-4">
+                        <h3><i class="fas fa-file-alt"></i> Descrição da Vaga</h3>
+                        <div id="jobDescription" class="job-description"></div>
+                    </div>
+
+                    <!-- Requisitos -->
+                    <div class="card mb-4" id="requirementsSection" style="display: none;">
+                        <h3><i class="fas fa-list-check"></i> Requisitos</h3>
+                        <ul id="jobRequirements"></ul>
+                    </div>
+
+                    <!-- Benefícios -->
+                    <div class="card mb-4" id="benefitsSection" style="display: none;">
+                        <h3><i class="fas fa-gift"></i> Benefícios</h3>
+                        <ul id="jobBenefits"></ul>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- Informações do Empregador -->
+                    <div class="card mb-4">
+                        <h3><i class="fas fa-user-tie"></i> Sobre o Empregador</h3>
+                        <div id="employerInfo">
+                            <p>Carregando informações...</p>
+                        </div>
+                    </div>
+
+                    <!-- Como se Candidatar -->
+                    <div class="card mb-4" id="applySection">
+                        <h3><i class="fas fa-paper-plane"></i> Como se Candidatar</h3>
+                        <div id="applyInstructions">
+                            <p>Carregando instruções...</p>
+                        </div>
+                        
+                        <div id="applyButtonContainer" class="mt-3"></div>
+                    </div>
+
+                    <!-- Informações de Contato -->
+                    <div class="card mb-4">
+                        <h3><i class="fas fa-address-book"></i> Contato</h3>
+                        <div id="contactInfo">
+                            <p>Carregando informações de contato...</p>
+                        </div>
+                    </div>
+
+                    <!-- Vagas Similares -->
+                    <div class="card">
+                        <h3><i class="fas fa-briefcase"></i> Vagas Similares</h3>
+                        <div id="similarJobs">
+                            <p>Carregando vagas similares...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vaga Não Encontrada -->
+        <div id="notFound" class="card" style="display: none; text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; color: #e74c3c; margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h2>Vaga Não Encontrada</h2>
+            <p>A vaga que você está procurando não existe ou foi removida.</p>
+            <a href="jobs.html" class="btn btn-success mt-3">
+                <i class="fas fa-search"></i> Ver Outras Vagas
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Estado da aplicação
+        let currentJob = null;
+        let currentUser = null;
+        let isEmployer = false;
+
+        // Obter ID da vaga da URL
+        function getJobIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Verificar autenticação
+        function checkAuth() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                    isEmployer = currentUser.isEmployer || false;
+                } catch (error) {
+                    console.error('Erro ao parsear usuário:', error);
+                }
+            }
+        }
+
+        // Carregar detalhes da vaga
+        async function loadJobDetails() {
+            const jobId = getJobIdFromURL();
+            if (!jobId) {
+                showNotFound();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/jobs/${jobId}`);
+                
+                if (!response.ok) {
+                    showNotFound();
+                    return;
+                }
+
+                currentJob = await response.json();
+                displayJobDetails();
+                
+                // Carregar vagas similares
+                loadSimilarJobs();
+                
+            } catch (error) {
+                console.error('Erro ao carregar vaga:', error);
+                showNotFound();
+            }
+        }
+
+        // Exibir detalhes da vaga
+        function displayJobDetails() {
+            // Ocultar loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('jobDetail').style.display = 'block';
+
+            // Preencher informações básicas
+            document.getElementById('jobTitle').textContent = currentJob.title;
+            document.getElementById('jobCompany').textContent = currentJob.company;
+            document.getElementById('jobLocation').textContent = currentJob.location;
+            document.getElementById('jobSalary').textContent = currentJob.salary || 'A combinar';
+            document.getElementById('jobType').textContent = currentJob.type;
+            
+            const vacanciesLeft = currentJob.vacancies - currentJob.filled;
+            document.getElementById('jobVacancies').textContent = 
+                `${currentJob.filled}/${currentJob.vacancies} preenchidas (${vacanciesLeft} disponíveis)`;
+
+            // Status badge
+            const statusBadge = document.getElementById('jobStatusBadge');
+            if (!currentJob.isActive) {
+                statusBadge.className = 'status-badge status-rejected';
+                statusBadge.textContent = 'Vaga Fechada';
+            } else if (vacanciesLeft <= 0) {
+                statusBadge.className = 'status-badge status-rejected';
+                statusBadge.textContent = 'Vagas Esgotadas';
+            } else {
+                statusBadge.className = 'status-badge status-accepted';
+                statusBadge.textContent = 'Vaga Ativa';
+            }
+
+            // Descrição
+            document.getElementById('jobDescription').innerHTML = 
+                currentJob.description.replace(/\n/g, '<br>');
+
+            // Requisitos
+            if (currentJob.requirements && currentJob.requirements.length > 0) {
+                document.getElementById('requirementsSection').style.display = 'block';
+                const requirementsList = document.getElementById('jobRequirements');
+                requirementsList.innerHTML = '';
+                currentJob.requirements.forEach(req => {
+                    const li = document.createElement('li');
+                    li.textContent = req;
+                    li.style.marginBottom = '0.5rem';
+                    requirementsList.appendChild(li);
+                });
+            }
+
+            // Benefícios
+            if (currentJob.benefits && currentJob.benefits.length > 0) {
+                document.getElementById('benefitsSection').style.display = 'block';
+                const benefitsList = document.getElementById('jobBenefits');
+                benefitsList.innerHTML = '';
+                currentJob.benefits.forEach(benefit => {
+                    const li = document.createElement('li');
+                    li.textContent = benefit;
+                    li.style.marginBottom = '0.5rem';
+                    benefitsList.appendChild(li);
+                });
+            }
+
+            // Informações do empregador
+            displayEmployerInfo();
+
+            // Como se candidatar
+            displayApplySection();
+
+            // Informações de contato
+            displayContactInfo();
+
+            // Botões de ação
+            displayActionButtons();
+        }
+
+        // Exibir informações do empregador
+        function displayEmployerInfo() {
+            const employerInfo = document.getElementById('employerInfo');
+            
+            let html = `
+                <p><strong>Nome:</strong> ${currentJob.employerName}</p>
+                <p><strong>Empresa:</strong> ${currentJob.company}</p>
+            `;
+
+            if (currentJob.employerId) {
+                html += `
+                    <p><strong>Conta verificada:</strong> <i class="fas fa-check-circle" style="color: #27ae60;"></i></p>
+                    <p><strong>Membro desde:</strong> ${new Date(currentJob.employerId.createdAt).toLocaleDateString('pt-BR')}</p>
+                `;
+            }
+
+            employerInfo.innerHTML = html;
+        }
+
+        // Exibir seção de candidatura
+        function displayApplySection() {
+            const applyInstructions = document.getElementById('applyInstructions');
+            const vacanciesLeft = currentJob.vacancies - currentJob.filled;
+            const canApply = currentJob.isActive && vacanciesLeft > 0;
+
+            let instructions = '';
+            
+            if (!canApply) {
+                if (!currentJob.isActive) {
+                    instructions = '<p class="alert alert-warning">Esta vaga está fechada e não aceita mais candidaturas.</p>';
+                } else {
+                    instructions = '<p class="alert alert-warning">Todas as vagas foram preenchidas.</p>';
+                }
+            } else {
+                instructions = `
+                    <p><strong>Para se candidatar:</strong></p>
+                    <ol>
+                        <li>Clique no botão "Candidatar-se" abaixo</li>
+                        <li>Deixe uma mensagem opcional para o empregador</li>
+                        <li>Confirme sua candidatura</li>
+                    </ol>
+                    <p class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Seu perfil será enviado automaticamente ao empregador
+                    </p>
+                `;
+            }
+
+            applyInstructions.innerHTML = instructions;
+
+            // Botão de candidatura
+            const applyButtonContainer = document.getElementById('applyButtonContainer');
+            applyButtonContainer.innerHTML = '';
+
+            if (canApply) {
+                if (currentUser) {
+                    // Verificar se já se candidatou
+                    const hasApplied = currentJob.applicants?.some(
+                        app => app.userId === currentUser._id
+                    );
+
+                    if (hasApplied) {
+                        applyButtonContainer.innerHTML = `
+                            <button class="btn btn-success" disabled style="width: 100%;">
+                                <i class="fas fa-check"></i> Já Candidatado
+                            </button>
+                            <p class="text-center mt-2" style="font-size: 0.9rem;">
+                                Status: <span class="status-badge status-pending">Pendente</span>
+                            </p>
+                        `;
+                    } else {
+                        applyButtonContainer.innerHTML = `
+                            <button onclick="applyToJob()" class="btn btn-success" style="width: 100%; padding: 1rem;">
+                                <i class="fas fa-paper-plane"></i> Candidatar-se Agora
+                            </button>
+                        `;
+                    }
+                } else {
+                    applyButtonContainer.innerHTML = `
+                        <a href="login.html?redirect=${window.location.href}" class="btn btn-success" style="width: 100%; padding: 1rem;">
+                            <i class="fas fa-sign-in-alt"></i> Entrar para Candidatar-se
+                        </a>
+                    `;
+                }
+            }
+        }
+
+        // Exibir informações de contato
+        function displayContactInfo() {
+            const contactInfo = document.getElementById('contactInfo');
+            
+            let html = `
+                <p><strong><i class="fas fa-envelope"></i> Email:</strong></p>
+                <p><a href="mailto:${currentJob.contactEmail}">${currentJob.contactEmail}</a></p>
+                
+                <p><strong><i class="fas fa-phone"></i> Telefone:</strong></p>
+                <p><a href="tel:${currentJob.contactPhone}">${currentJob.contactPhone}</a></p>
+                
+                <p class="alert alert-info mt-3">
+                    <i class="fas fa-shield-alt"></i>
+                    Estas informações são visíveis apenas para usuários registrados
+                </p>
+            `;
+
+            contactInfo.innerHTML = html;
+        }
+
+        // Exibir botões de ação
+        function displayActionButtons() {
+            const actionButtons = document.getElementById('actionButtons');
+            actionButtons.innerHTML = '';
+
+            // Botão para voltar
+            const backBtn = document.createElement('a');
+            backBtn.href = 'jobs.html';
+            backBtn.className = 'btn btn-outline';
+            backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> Voltar';
+            actionButtons.appendChild(backBtn);
+
+            // Se for o empregador da vaga
+            if (currentUser && currentUser._id === currentJob.employerId?._id) {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar Vaga';
+                editBtn.onclick = () => editJob();
+                actionButtons.appendChild(editBtn);
+
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = currentJob.isActive ? 'btn btn-warning' : 'btn btn-success';
+                toggleBtn.innerHTML = currentJob.isActive ? 
+                    '<i class="fas fa-times"></i> Fechar Vaga' : 
+                    '<i class="fas fa-check"></i> Reabrir Vaga';
+                toggleBtn.onclick = () => toggleJobStatus();
+                actionButtons.appendChild(toggleBtn);
+            }
+        }
+
+        // Candidatar-se à vaga
+        async function applyToJob() {
+            if (!currentUser) {
+                alert('Você precisa estar logado para se candidatar.');
+                window.location.href = `login.html?redirect=${window.location.href}`;
+                return;
+            }
+
+            const message = prompt('Deixe uma mensagem para o empregador (opcional):\n\nEx: "Tenho experiência na área", "Estou disponível imediatamente"');
+            
+            if (message === null) return; // Usuário cancelou
+
+            try {
+                const response = await fetch(`/api/jobs/${currentJob._id}/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': currentUser._id
+                    },
+                    body: JSON.stringify({
+                        message: message || ''
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Candidatura enviada com sucesso!\n\nO empregador será notificado e entrará em contato se houver interesse.');
+                    // Recarregar a página para atualizar o status
+                    window.location.reload();
+                } else {
+                    alert(`❌ ${result.error || 'Erro ao enviar candidatura'}`);
+                }
+            } catch (error) {
+                console.error('Erro ao candidatar-se:', error);
+                alert('Erro de conexão. Verifique sua internet e tente novamente.');
+            }
+        }
+
+        // Editar vaga (apenas empregador)
+        function editJob() {
+            alert('Funcionalidade de edição de vaga em desenvolvimento!');
+        }
+
+        // Alternar status da vaga (apenas empregador)
+        async function toggleJobStatus() {
+            if (!confirm(`Tem certeza que deseja ${currentJob.isActive ? 'FECHAR' : 'REABRIR'} esta vaga?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/jobs/${currentJob._id}/toggle`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-ID': currentUser._id
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Vaga ${currentJob.isActive ? 'fechada' : 'reaberta'} com sucesso!`);
+                    window.location.reload();
+                } else {
+                    alert(`❌ ${result.error || 'Erro ao atualizar vaga'}`);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar vaga:', error);
+                alert('Erro de conexão. Tente novamente.');
+            }
+        }
+
+        // Carregar vagas similares
+        async function loadSimilarJobs() {
+            try {
+                const response = await fetch(`/api/jobs?category=${currentJob.category}&limit=3`);
+                const similarJobs = await response.json();
+
+                const container = document.getElementById('similarJobs');
+                
+                if (!similarJobs || similarJobs.length === 0) {
+                    container.innerHTML = '<p class="text-muted">Nenhuma vaga similar encontrada</p>';
+                    return;
+                }
+
+                let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+                
+                similarJobs.forEach(job => {
+                    if (job._id === currentJob._id) return; // Não mostrar a própria vaga
+                    
+                    const vacanciesLeft = job.vacancies - job.filled;
+                    if (vacanciesLeft <= 0) return; // Não mostrar vagas preenchidas
+
+                    html += `
+                        <div style="padding: 1rem; border: 1px solid #eee; border-radius: 5px; background: #f8f9fa;">
+                            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem;">
+                                <a href="job-detail.html?id=${job._id}" style="color: #2c3e50; text-decoration: none;">
+                                    ${job.title}
+                                </a>
+                            </h4>
+                            <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                                <i class="fas fa-building"></i> ${job.company}
+                            </p>
+                            <p style="margin: 0.3rem 0; font-size: 0.9rem;">
+                                <i class="fas fa-map-marker-alt"></i> ${job.location}
+                            </p>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                <span class="vacancy-badge vacancy-available" style="font-size: 0.8rem;">
+                                    ${vacanciesLeft} vaga${vacanciesLeft !== 1 ? 's' : ''}
+                                </span>
+                                <a href="job-detail.html?id=${job._id}" style="font-size: 0.9rem; color: #3498db;">
+                                    Ver →
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Erro ao carregar vagas similares:', error);
+                // Silenciar erro
+            }
+        }
+
+        // Mostrar "não encontrado"
+        function showNotFound() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('notFound').style.display = 'block';
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadJobDetails();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Emprego Lichinga</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-briefcase"></i>
+                    Emprego Lichinga <span>Niassa</span>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html"><i class="fas fa-home"></i> Voltar ao Início</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" style="min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 400px; width: 100%;">
+            <div class="text-center mb-3">
+                <div style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <h2>Entrar na Conta</h2>
+                <p class="text-muted">Acesse sua conta para continuar</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="seu@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Senha</label>
+                    <input type="password" id="password" class="form-control" placeholder="Sua senha" required>
+                    <div style="text-align: right; margin-top: 0.5rem;">
+                        <a href="#" onclick="alert('Em breve: recuperação de senha')" style="font-size: 0.9rem;">
+                            Esqueceu a senha?
+                        </a>
+                    </div>
+                </div>
+                
+                <div id="errorMessage" class="alert alert-danger hidden"></div>
+                
+                <button type="submit" class="btn" style="width: 100%; padding: 1rem;">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </form>
+            
+            <div class="text-center mt-3">
+                <p>Não tem conta? <a href="register.html">Registre-se gratuitamente</a></p>
+                <p style="margin-top: 1rem;">
+                    <a href="index.html" class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </p>
+            </div>
+            
+            <div class="mt-4" style="border-top: 1px solid #eee; padding-top: 1rem;">
+                <p class="text-center" style="font-size: 0.9rem; color: #7f8c8d;">
+                    <i class="fas fa-info-circle"></i>
+                    Problemas para entrar? Entre em contato: contato@empregolichinga.co.mz
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = '';
+            errorDiv.classList.add('hidden');
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Validação básica
+            if (!email || !password) {
+                errorDiv.textContent = 'Por favor, preencha todos os campos';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                // Mostrar loading
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+                submitBtn.disabled = true;
+                
+                // Fazer requisição
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Salvar dados do usuário
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    // Redirecionar
+                    window.location.href = 'dashboard.html';
+                } else {
+                    errorDiv.textContent = result.error || 'Email ou senha incorretos';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                errorDiv.classList.remove('hidden');
+                console.error('Erro:', error);
+            } finally {
+                // Restaurar botão
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Verificar se já está logado
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = localStorage.getItem('user');
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+            
+            // Preencher email se veio de registro
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('email').value = email;
+            }
+        });
+    </script>
+</body>
+</html>
